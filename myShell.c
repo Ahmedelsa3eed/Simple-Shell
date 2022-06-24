@@ -11,7 +11,7 @@
 
 char input[SIZE], *cmd, *parm[SIZE], key[10]={'\0'}, value[10]={'\0'}, *new_echo_key;
 
-/*extract the cmd and the parameters*/
+/* extract the cmd and the parameters */
 void parse_input(){
     int i;
     char str[100];
@@ -23,7 +23,7 @@ void parse_input(){
     parm[0] = token;
     i = 1;
     while( token != NULL ){
-        if( strcmp(cmd, "export") == 0 ){//with quotes or without: key=parm[1], val=parm[2]
+        if( strcmp(cmd, "export") == 0 ){
             token = strtok(NULL, "=");
         }
         else if( strcmp(cmd, "echo") == 0 ){
@@ -48,7 +48,7 @@ void parse_input(){
     
 }
 
-/*extract the stored value into the parameters array*/
+/* extract the stored value into the parameters array */
 void evaluate(){
     int i,j,p;
     for(i = 0; input[i] != '\0'; i++){
@@ -69,7 +69,7 @@ void evaluate(){
     }
 }
 
-/*return true if the input type is built-in ,false otherwise*/
+/* return true if the input type is built-in ,false otherwise */
 int input_type(){
     if((strcmp(cmd, "cd") == 0) ||
      (strcmp(cmd, "echo") == 0) ||
@@ -81,7 +81,7 @@ int input_type(){
     }
 }
 
-/*return 1 for "cd", 2 for "echo" , 3 for "export" and 4 for pwd*/
+/* return 1 for "cd", 2 for "echo" , 3 for "export" and 4 for pwd */
 int builtin_type(){
     if(strcmp(cmd, "cd") == 0) return 1;
     else if(strcmp(cmd, "echo") == 0) return 2;
@@ -89,19 +89,20 @@ int builtin_type(){
     else if(strcmp(cmd, "pwd") == 0) return 4;
 }
 
-/*change the directory to the current working directory*/
+/* change the directory to the current working directory */
 void setup_environment(){
     chdir(getcwd(NULL, 0));
 }
 
-/*Accept input of two forms,
- either a string without spaces, or a full string inside double quotations*/
+/* 
+ Accept input of two forms, either a string without spaces,
+ or a full string inside double quotations */
 void evaluate_export(){
     strcpy(key, parm[1]);
     strcpy(value, parm[2]);
 }
 
-/*input to echo must be within double quotations */
+/* input to echo must be within double quotations */
 void evalute_echo(){
     int i, k=0, flag = 0;
     char tmp[100] = {'\0'};
@@ -193,20 +194,25 @@ void execute_command(){
     evaluate();
     int statusPtr;
     pid_t child_id, end_id;
-    if( (child_id = fork()) == -1){//Error
+    if( (child_id = fork()) == -1){ 
+        //Error
         perror("fork error");
         exit(EXIT_FAILURE);
     }  
-    else if(child_id  == 0){//child 
+    else if(child_id  == 0){
+        //child 
         execvp(cmd, parm); 
         printf("Error in execvp!\n");
         exit(EXIT_FAILURE);
     }
-    else{//parent
-        if((input[strlen(input) - 1] == '&')){//should not wait (backgroud)
+    else{
+        //parent
+        if((input[strlen(input) - 1] == '&')){
+            //should not wait (backgroud)
             return;
         }
-        else{//foregroud
+        else{
+            //foregroud
             end_id = waitpid(child_id, &statusPtr, 0);
             if (end_id == -1) {            
                 perror("waitpid error");
@@ -226,11 +232,12 @@ void shell(){
         input[strlen(input) - 1] = '\0';
         parse_input();
         if(strcmp(cmd, "exit") == 0) break;
-        if(input_type()){//shell built_in
-            
+        if(input_type()){
+            //shell built_in
             execute_shell_builtin();
         }
-        else{//executable or error
+        else{
+            //executable or error
             execute_command();
         }
     }
